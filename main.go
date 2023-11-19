@@ -14,7 +14,7 @@ func main() {
 	// Usage with Token:
 	//req := &folders.FetchFolderRequest{
 	//	OrgID:     uuid.FromStringOrNil(folders.DefaultOrgID),
-	//	PageToken: "6de349030601",
+	//	PageToken: "0cdd2af93afb",
 	//}
 
 	req := &folders.FetchFolderRequest{

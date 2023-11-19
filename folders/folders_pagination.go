@@ -58,9 +58,6 @@ func FetchAllFoldersByOrgIDPaginated(orgID uuid.UUID, pageToken string) (resFold
 			err = errors.New(fmt.Sprintf("panic occurred: %s", r))
 		}
 	}()
-	if len(pageToken) == 0 {
-		// Create a new token
-	}
 
 	folders := GetSampleData()
 
@@ -100,11 +97,25 @@ func PaginateExistingData(resFolder []*Folder, token string) (paginatedFolder []
 	fmt.Println(filename)
 	basePath := filepath.Dir(filename)
 	filePath := filepath.Join(basePath, "pagination.json")
+	var currentToken string
+	if len(token) > 0 {
+		currentToken, err = GetNextTokenNumber()
+		if err != nil {
+			fmt.Printf("could not retrieve current token number: %s\n", err)
+			return nil, err
+		}
+	}
 	if len(token) == 0 {
-		// This means that this is the first request and we need to generate a new token.
+		// This means that this is the first request, and we need to generate a new token.
 		newToken := GenerateSecureToken(6)
 		// find the new offset ID
 		nextId := offsetValue + 1
+		if cap(resFolder) < offsetValue {
+			paginatedFolder = resFolder[:]
+			newToken = ""
+		} else {
+			paginatedFolder = resFolder[:offsetValue]
+		}
 		map1 := map[string]string{
 			"token":    newToken,
 			"offsetId": strconv.Itoa(nextId),
@@ -115,8 +126,7 @@ func PaginateExistingData(resFolder []*Folder, token string) (paginatedFolder []
 			return nil, err
 		}
 		os.WriteFile(filePath, jsonString, os.ModePerm)
-		paginatedFolder = resFolder[:offsetValue]
-	} else {
+	} else if token == currentToken {
 		offsetId, err := GetNextOffsetId()
 		if err != nil {
 			fmt.Printf("could not get next offset id: %s\n", err)
@@ -129,7 +139,12 @@ func PaginateExistingData(resFolder []*Folder, token string) (paginatedFolder []
 		}
 		newToken := GenerateSecureToken(6)
 		newOffset := i + offsetValue
-		paginatedFolder = resFolder[i:newOffset]
+		if cap(resFolder[i:]) < offsetValue {
+			paginatedFolder = resFolder[:]
+			newToken = ""
+		} else {
+			paginatedFolder = resFolder[i:newOffset]
+		}
 		map1 := map[string]string{
 			"token":    newToken,
 			"offsetId": strconv.Itoa(newOffset),
@@ -141,6 +156,10 @@ func PaginateExistingData(resFolder []*Folder, token string) (paginatedFolder []
 		}
 		os.WriteFile(filePath, jsonString, os.ModePerm)
 
+	} else {
+		err = errors.New(fmt.Sprintf("Invalid Token Number: %s", currentToken))
+		fmt.Printf("error occurred: %s\n", err)
+		return nil, err
 	}
 	return paginatedFolder, err
 }
@@ -154,39 +173,36 @@ func GenerateSecureToken(length int) string {
 }
 
 func GetNextTokenNumber() (token string, err error) {
-	_, filename, _, _ := runtime.Caller(0)
-	fmt.Println(filename)
-	basePath := filepath.Dir(filename)
-	filePath := filepath.Join(basePath, "pagination.json")
-	fileData, err := os.ReadFile(filePath)
-	if err != nil {
-		return "", err
-	}
-	var dataMap map[string]interface{}
-	err = json.Unmarshal(fileData, &dataMap)
-	if err != nil {
-		return "", err
-	}
-
 	// Read the json file and get the token number
+	dataMap, err := GetPaginationData()
+	if err != nil {
+		return "", err
+	}
 	return dataMap["token"].(string), nil
 }
 
 func GetNextOffsetId() (token string, err error) {
+	// Read the json file and get the token number
+	dataMap, err := GetPaginationData()
+	if err != nil {
+		return "", err
+	}
+	return dataMap["offsetId"].(string), nil
+}
+
+func GetPaginationData() (map[string]interface{}, error) {
 	_, filename, _, _ := runtime.Caller(0)
 	fmt.Println(filename)
 	basePath := filepath.Dir(filename)
 	filePath := filepath.Join(basePath, "pagination.json")
 	fileData, err := os.ReadFile(filePath)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	var dataMap map[string]interface{}
 	err = json.Unmarshal(fileData, &dataMap)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-
-	// Read the json file and get the token number
-	return dataMap["offsetId"].(string), nil
+	return dataMap, nil
 }

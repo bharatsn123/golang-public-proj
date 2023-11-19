@@ -71,3 +71,8 @@ To run the code on your local machine
 ## Submission
 
 Create a repo in your chosen git repository (make sure it is public so we can access it) and reply with the link to your code. We recommend using Github. 
+
+
+## Contact
+
+If you have any questions feel free to contact us at: interns@safetyculture.io
