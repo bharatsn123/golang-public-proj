@@ -1,6 +1,8 @@
-# sc-interns-2023
+# Pagination Go Project
 
-The technical take home for SC interns of 2023.
+The project revolves around fetching and managing folder structures, particularly for an organization. 
+
+A token is returned, which can be further used to fetch results in chunks, so that the user interface can load data in installments.
 
 ## Compile instruction
 
@@ -26,22 +28,6 @@ To run the code on your local machine
     | static.go
 ```
 
-## Instructions
-
-- This technical assessment consist of 2 components.
-- Component 1:
-  - within `folders.go`. 
-    - We would like you to read through the code and run the code.
-    - Write some comments on what you think the code does.
-    - suggest some improvement that can be made to the code.
-    - Implement the suggested improvement.
-    - Write up some unit tests in `folders_test.go` for your new `GetAllFolders` method
-
-- Component 2:
-  - Extend your improved code to now facilitate pagination. 
-  - You can copy over the existing methods into `folders_pagination.go` to get started.
-  - Write a short explanation on why you choosen the solution you implemented.
-
 ## What is pagination?
   - Pagination helps break down a large dataset into smaller chunks.
   - The small data chunk will then be served to the client side usually accompanied a token that points to the next chunk.
@@ -49,10 +35,7 @@ To run the code on your local machine
 ```
   original data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   
-  The current result will look like this:
-  { data: [1, 2, 3, ..., 10] }
-  
-  With pagination implementation, the result may look like this:
+  With pagination implementation, the results look like this:
   request() -> { data: [1, 2], token: "nQsjz" }
 
   The token can then be used to fetch more result:
@@ -67,12 +50,3 @@ To run the code on your local machine
   
   { data: [9, 10], token: "" }
 ```
-
-## Submission
-
-Create a repo in your chosen git repository (make sure it is public so we can access it) and reply with the link to your code. We recommend using Github. 
-
-
-## Contact
-
-If you have any questions feel free to contact us at: interns@safetyculture.io
