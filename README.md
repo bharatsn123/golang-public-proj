@@ -31,7 +31,7 @@ To run the code on your local machine
 ## What is pagination?
   - Pagination helps break down a large dataset into smaller chunks.
   - The small data chunk will then be served to the client side usually accompanied a token that points to the next chunk.
-  - The end result could potentially look like this:
+  - Further explanation and demonstration:
 ```
   original data: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   
